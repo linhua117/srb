@@ -27,7 +27,7 @@ public class AdminIntegralGradeController {
     private IntegralGradeService integralGradeService;
 
     @GetMapping("/list")
-    @ApiOperation("积分等级列表744545")
+    @ApiOperation("积分等级列表7")
     public R lisAll(@RequestParam(name = "size",required = true) Integer size, @RequestParam(name = "current",required = true) Integer current,BigDecimal borrowAmount) {
         LambdaQueryWrapper<IntegralGrade> integralGradeQueryWrapper = new LambdaQueryWrapper<>();
         integralGradeQueryWrapper.orderByDesc(IntegralGrade::getId).le(borrowAmount != null,IntegralGrade::getBorrowAmount,borrowAmount);
