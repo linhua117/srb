@@ -59,6 +59,7 @@ public class AdminIntegralGradeController {
     @PutMapping()
     @ApiOperation("积分等级修改")
     public R updateIntegralGrade(@RequestBody IntegralGrade integralGrade) {
+        Assert.notNull(integralGrade.getId(), ResponseEnum.BORROW_AMOUNT_NULL_ERROR);
         boolean b = integralGradeService.updateById(integralGrade);
         if(b){
             return R.ok();
