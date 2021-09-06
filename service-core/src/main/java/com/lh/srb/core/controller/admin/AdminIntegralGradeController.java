@@ -3,7 +3,9 @@ package com.lh.srb.core.controller.admin;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lh.common.exception.Assert;
 import com.lh.common.result.R;
+import com.lh.common.result.ResponseEnum;
 import com.lh.srb.core.entity.IntegralGrade;
 import com.lh.srb.core.service.IntegralGradeService;
 import io.swagger.annotations.Api;
@@ -26,7 +28,7 @@ public class AdminIntegralGradeController {
     @Resource
     private IntegralGradeService integralGradeService;
 
-    @GetMapping("/list")
+    @GetMapping()
     @ApiOperation("积分等级列表")
     public R lisAll(@RequestParam(name = "size",required = true) Integer size, @RequestParam(name = "current",required = true) Integer current,BigDecimal borrowAmount) {
         LambdaQueryWrapper<IntegralGrade> integralGradeQueryWrapper = new LambdaQueryWrapper<>();
@@ -42,7 +44,7 @@ public class AdminIntegralGradeController {
         return R.ok().data(stringObjectHashMap).message("获取列表成功");
     }
 
-    @DeleteMapping("/del/{id}")
+    @DeleteMapping("{id}")
     @ApiOperation("积分等级删除")
     public R delIntegralGrade(@ApiParam("idss") @PathVariable Long id) {
         boolean b = integralGradeService.removeById(id);
@@ -54,7 +56,7 @@ public class AdminIntegralGradeController {
        // return integralGradeService.removeById(id);
     }
 
-    @PutMapping("/update")
+    @PutMapping()
     @ApiOperation("积分等级修改")
     public R updateIntegralGrade(@RequestBody IntegralGrade integralGrade) {
         boolean b = integralGradeService.updateById(integralGrade);
@@ -65,9 +67,10 @@ public class AdminIntegralGradeController {
         }
     }
 
-    @PostMapping("/add")
+    @PostMapping("/save")
     @ApiOperation("积分等级添加")
     public R addIntegralGrade(@RequestBody IntegralGrade integralGrade) {
+        Assert.notNull(integralGrade.getBorrowAmount(), ResponseEnum.BORROW_AMOUNT_NULL_ERROR);
         boolean b = integralGradeService.save(integralGrade);
         if(b){
             return R.ok();
@@ -76,7 +79,7 @@ public class AdminIntegralGradeController {
         }
     }
     @ApiOperation("根据id查积分等级")
-    @GetMapping("/get/{id}")
+    @GetMapping("{id}")
     public R getByIdIntegralGrade(@PathVariable Long id){
         IntegralGrade integralGrade = integralGradeService.getById(id);
         return R.ok().data("record",integralGrade);
