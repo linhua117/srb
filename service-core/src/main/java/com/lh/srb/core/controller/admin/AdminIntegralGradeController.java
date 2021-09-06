@@ -67,7 +67,7 @@ public class AdminIntegralGradeController {
         }
     }
 
-    @PostMapping("/save")
+    @PostMapping()
     @ApiOperation("积分等级添加")
     public R addIntegralGrade(@RequestBody IntegralGrade integralGrade) {
         Assert.notNull(integralGrade.getBorrowAmount(), ResponseEnum.BORROW_AMOUNT_NULL_ERROR);
