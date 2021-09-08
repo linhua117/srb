@@ -9,10 +9,12 @@ import com.lh.srb.core.pojo.dto.ExcelDictDTO;
 import com.lh.srb.core.service.DictService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,6 +28,20 @@ import java.util.List;
 @Service
 @Slf4j
 public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements DictService {
+
+    @Override
+    public List<ExcelDictDTO> listDictData() {
+        List<Dict> dictList = baseMapper.selectList(null);
+        //创建ExcelDictDTO列表，将Dict列表转换成ExcelDictDTO列表
+        ArrayList<ExcelDictDTO> excelDictDTOList = new ArrayList<>(dictList.size());
+        dictList.forEach(dict -> {
+
+            ExcelDictDTO excelDictDTO = new ExcelDictDTO();
+            BeanUtils.copyProperties(dict, excelDictDTO);
+            excelDictDTOList.add(excelDictDTO);
+        });
+        return excelDictDTOList;
+    }
 
     @Override
     public List<Dict> listByParentId(Long parentId) {
