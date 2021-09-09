@@ -9,13 +9,17 @@ import com.lh.srb.core.pojo.dto.ExcelDictDTO;
 import com.lh.srb.core.service.DictService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -28,6 +32,9 @@ import java.util.List;
 @Service
 @Slf4j
 public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements DictService {
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     @Override
     public List<ExcelDictDTO> listDictData() {
@@ -45,11 +52,29 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, Dict> implements Di
 
     @Override
     public List<Dict> listByParentId(Long parentId) {
-        List<Dict> dictList = baseMapper.selectList(new QueryWrapper<Dict>().eq("parent_id", parentId));
+
+
+        List<Dict> dictList = null;
+        try {
+            dictList= (List<Dict>)redisTemplate.opsForValue().get("srb:core:dictList:" + parentId);
+            if(dictList != null){
+                log.info("redis数据##################################");
+                return dictList;
+            }
+        }catch (Exception e){
+            log.error("redis服务器异常：" + ExceptionUtils.getStackTrace(e));
+        }
+
+        dictList = baseMapper.selectList(new QueryWrapper<Dict>().eq("parent_id", parentId));
         dictList.forEach(dict -> {
             Boolean t = hasChildren(dict);
             dict.setHasChildren(t);
         });
+        try {
+            redisTemplate.opsForValue().set("srb:core:dictList:" + parentId,dictList,5, TimeUnit.MINUTES);
+        }catch (Exception e){
+            log.error("redis服务器异常：" + ExceptionUtils.getStackTrace(e));
+        }
         return dictList;
     }
     @Transactional(rollbackFor = {Exception.class})
